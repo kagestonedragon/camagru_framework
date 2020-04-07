@@ -1,0 +1,1 @@
+<p><a href="/site/auth/">Войти</a> | <a href="/site/registration/">Зарегистрироваться</a></p>
