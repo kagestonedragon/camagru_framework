@@ -2,15 +2,15 @@
 
 function autoloader($class)
 {
-    $class = explode('\\', strtolower($class));
+    $class = explode('\\', $class);
     require_once(
         implode(
             '/',
             [
                 $_SERVER['DOCUMENT_ROOT'],
-                $class[0],
-                $class[1],
-                ucfirst($class[2]) . '.php',
+                strtolower($class[0]),
+                strtolower($class[1]),
+                $class[2] . '.php',
             ]
         )
     );

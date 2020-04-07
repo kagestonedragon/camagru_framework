@@ -3,6 +3,7 @@
 namespace Framework\Components;
 
 use Framework\Helpers\Registration as RegistrationHelper;
+use Framework\Modules\ORM;
 
 /**
  * Class Registration
@@ -17,38 +18,21 @@ class Registration extends Component
 {
     protected function Process()
     {
+        global $REQUEST;
         global $USER;
         global $APP;
 
+        $requestMethod = $REQUEST->getMethod();
         if ($USER->isAuthorized()) {
             $APP->Redirect('/site/');
-        } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if ($this->isDataValid($_POST) && $this->isUserNotExists($_POST['username'], $_POST['email'])) {
-                $this->addUser($_POST);
-                echo "success";
-            } else {
-                echo 'KO';
+        } else if ($requestMethod == 'POST') {
+            if ($this->isUserNotExists($REQUEST->arPost['username'], $REQUEST->arPost['email'])) {
+                $this->addUser(
+                    $REQUEST->arPost['username'],
+                    $REQUEST->arPost['email'],
+                    $REQUEST->arPost['password']
+                );
             }
-        }
-    }
-
-
-    /**
-     * Метод валидации пришедших данных
-     * @param array $data
-     * @return bool
-     */
-    private function isDataValid(array $data)
-    {
-        if (empty($data) ||
-            empty($data['username']) ||
-            empty($data['password']) ||
-            empty($data['email'])
-        ) {
-            $this->result['error'] = 'checkdata';
-            return (false);
-        } else {
-            return (true);
         }
     }
 
@@ -60,40 +44,43 @@ class Registration extends Component
      */
     private function isUserNotExists(string $username, string $email)
     {
-        global $DB;
-
-        $result = $DB->execute(
-            'SELECT id FROM ' . $this->params['TABLE'] . ' WHERE username=:username OR email=:email',
-            [
+        $user = (new ORM('#users'))
+            ->select([
+                    'id'
+            ])
+            ->where('username=:username')
+            ->or('email=:email')
+            ->execute([
+                '#users' => $this->params['TABLE'],
                 ':username' => $username,
                 ':email' => $email,
-            ]
-        );
+            ]);
 
-        if (empty($result)) {
-            return (true);
-        } else {
-            return (false);
-        }
+        return (
+            empty($user) ? true : false
+        );
     }
 
     /**
      * Метод добавление нового пользователя
-     * @param array $data
+     * @param string $username
+     * @param string $email
+     * @param string $password
      */
-    private function addUser(array $data)
+    private function addUser(string $username, string $email, string $password)
     {
-        global $DB;
-
-        $result = $DB->execute(
-            'INSERT INTO ' . $this->params['TABLE'] . ' (username, email, password, token) 
-            VALUES (:username, :email, :password, :token)',
-            [
-                ':username' => $data['username'],
-                ':email' => $data['email'],
-                ':password' => RegistrationHelper::encryptPassword($data['password']),
-                ':token' => RegistrationHelper::generateToken($data['username']),
-            ]
-        );
+        (new ORM('#users'))
+            ->insert([
+                'username' => ':username',
+                'email' => ':email',
+                'password' => ':password',
+                'token' => ':token',
+            ])
+            ->execute([
+                ':username' => $username,
+                ':email' => $email,
+                ':password' => RegistrationHelper::encryptPassword($password),
+                ':token' => RegistrationHelper::generateToken($username),
+            ]);
     }
 }

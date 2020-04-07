@@ -3,8 +3,8 @@
 namespace Framework\Components;
 
 use Framework\Helpers\Posts as PostsHelper;
-use Framework\Modules\Debugger;
-use Framework\Modules\Image;
+use Framework\Modules\ORM;
+use Framework\Modules\File;
 
 /**
  * Class Posts
@@ -16,57 +16,59 @@ use Framework\Modules\Image;
  */
 class Posts extends Component
 {
+    const IMAGES_DIR = '/framework/upload/';
+
     protected function Process()
     {
+        global $REQUEST;
         global $USER;
         global $APP;
 
         if (!$USER->isAuthorized()) {
             $APP->Redirect('/site/auth');
-        } else if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            if (isset($_GET['post']) && isset($_GET['delete'])) {
-                $this->deletePost($_GET['post']);
+        }
+
+        $requestMethod = $REQUEST->getMethod();
+        if ($requestMethod == 'GET') {
+            if (isset($REQUEST->arGet['post']) && isset($REQUEST->arGet['delete'])) {
+                $this->deleteItem($REQUEST->arGet['post'], $USER->getId());
             }
-        } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if (($filename = PostsHelper::uploadFile($_FILES['image_file'], $USER->getId()))) {
-                Image::addTemplate(
-                    FW_UPLOAD . '/1/' . $filename,
-                    FW_UPLOAD . '/templates/png-file-6-1.png',
-                    $filename
-                );
-                $this->addPost($filename, $_POST['description']);
+        } else if ($requestMethod == 'POST') {
+            $filename = File::upload(
+                $USER->getId(),
+                $REQUEST->arFiles['image_file']['name'],
+                $REQUEST->arFiles['image_file']['type'],
+                $REQUEST->arFiles['image_file']['tmp_name']
+            );
+            if ($filename !== false) {
+                $this->addItem($filename, $_POST['description'], $USER->getId());
             }
         }
 
-        $this->result['ITEMS'] = $this->getPostsList();
+        $this->result['ITEMS'] = $this->getItemsList();
     }
 
-    private function copyFile()
-    {
-        if (!empty($_FILES)) {
-            copy($_FILES['image_file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . '/framework/upload/test.jpg');
-        }
-    }
     /**
      * Метод добавления нового поста
      * @param string $image
      * @param string $description
+     * @param string $userId
      */
-    private function addPost(string $image, string $description)
+    private function addItem(string $image, string $description, string $userId)
     {
-        global $DB;
-        global $USER;
-
-        $DB->execute(
-            'INSERT INTO ' . $this->params['TABLE'] .' (image, description) VALUES (:image, :description)',
-            [
-                'image' => $image,
-                'description' => $description,
-            ]
-        );
-        $this->addConnectionUserPost(
-            $DB->getLastInsertedId($this->params['TABLE']),
-            $USER->getId()
+        $id = (new ORM('#posts'))
+            ->insert([
+                'image' => ':image',
+                'description' => ':description',
+            ])->
+            execute([
+                '#posts' => $this->params['TABLE'],
+                ':image' => $image,
+                ':description' => $description,
+            ]);
+        $this->addConnection(
+            $id,
+            $userId
         );
     }
 
@@ -75,98 +77,114 @@ class Posts extends Component
      * @param string $postId
      * @param string $userId
      */
-    private function addConnectionUserPost(string $postId, string $userId)
+    private function addConnection(string $postId, string $userId)
     {
-        global $DB;
-
-        $DB->execute(
-            'INSERT INTO ' . $this->params['TABLE_CONNECTION'] . '(user_id, post_id) VALUES (:user_id, :post_id)',
-            [
-                'user_id' => $userId,
-                'post_id' => $postId,
-            ]
-        );
+        (new ORM('#connection'))
+            ->insert([
+                'user_id' => ':user_id',
+                'post_id' => ':post_id',
+            ])
+            ->execute([
+                '#connection' => $this->params['TABLE_CONNECTION'],
+                ':user_id' => $userId,
+                ':post_id' => $postId,
+            ]);
     }
 
     /**
      * Получение списка постов
      */
-    private function getPostsList()
+    private function getItemsList()
     {
-        global $DB;
+        $items = (new ORM('#posts'))
+            ->select([
+                    '#posts.id',
+                    '#users.username',
+                    '#users.id as user_id',
+                    '#posts.image',
+                    '#posts.description',
+                    '#posts.date'
+            ])
+            ->left('#connection', '#posts.id=#connection.post_id')
+            ->left('#users', '#connection.user_id=#users.id')
+            ->order(
+                '#posts.date',
+                'DESC'
+            )->execute([
+                    '#posts' => $this->params['TABLE'],
+                    '#users' => $this->params['TABLE_USERS'],
+                    '#connection' => $this->params['TABLE_CONNECTION'],
+                ],
+                false
+            );
 
-        /*
-        SELECT posts.id, users.username, posts.image, posts.description, posts.date FROM posts
-            LEFT JOIN users_posts ON posts.id=users_posts.post_id
-            LEFT JOIN users ON users_posts.user_id=users.id ORDER BY posts.date DESC
-        */
-        $result = $DB->execute(
-            'SELECT ' .
-            $this->params['TABLE'] . '.id, ' .
-            $this->params['TABLE_USERS'] . '.username, ' .
-            $this->params['TABLE_USERS'] . '.id as user_id, ' .
-            $this->params['TABLE'] . '.image, ' .
-            $this->params['TABLE'] . '.description, ' .
-            $this->params['TABLE'] . '.date ' .
-            'FROM ' . $this->params['TABLE'] . ' ' .
-            'LEFT JOIN ' . $this->params['TABLE_CONNECTION'] .
-            ' ON ' . $this->params['TABLE'] . '.id=' . $this->params['TABLE_CONNECTION'] . '.post_id ' .
-            'LEFT JOIN ' . $this->params['TABLE_USERS'] .
-            ' ON ' . $this->params['TABLE_CONNECTION'] . '.user_id=' . $this->params['TABLE_USERS'] . '.id ' .
-            'ORDER BY ' . $this->params['TABLE'] . '.date DESC',
-            [],
-            false
-        );
 
-        foreach ($result as $itemKey => $itemValue) {
-            $result[$itemKey]['image'] = '/framework/upload/' . $itemValue['user_id'] . '/' . $itemValue['image'];
-        }
-        return ($result);
+        PostsHelper::generatePathToImages($items, Posts::IMAGES_DIR);
+        return ($items);
     }
 
-    private function deletePost(string $postId)
+    /**
+     * Метод удаления поста
+     * @param string $postId
+     * @param string $userId
+     */
+    private function deleteItem(string $postId, string $userId)
     {
-        global $DB;
-        global $USER;
-
-        if (($filename = $this->isPostAuthor($postId, $USER->getId()))) {
+        if (($filename = $this->validateDeletion($postId, $userId))) {
             // удаление из основной таблицы
-            $DB->execute(
-                'DELETE FROM ' . $this->params['TABLE'] . ' ' .
-                'WHERE id=' . $postId
-            );
+            (new ORM('#posts'))
+                ->delete()
+                ->where('id=:post_id')
+                ->execute([
+                    '#posts' => $this->params['TABLE'],
+                    ':post_id' => $postId,
+                ]);
             // удаление из таблицы связи
-            $DB->execute(
-                'DELETE FROM ' . $this->params['TABLE_CONNECTION'] . ' ' .
-                'WHERE post_id=' . $postId
-            );
+            $this->deleteConnection($postId);
             // удаляем файл с изображением
-            unlink(FW_UPLOAD . '/' . $USER->getId() . '/' . $filename);
+            File::delete($userId, $filename);
         }
     }
 
-    private function isPostAuthor(string $postId, string $userId)
+    /**
+     * Метод удаляения связи
+     * @param string $postId
+     */
+    private function deleteConnection(string $postId)
     {
-        global $DB;
+        (new ORM('#connection'))
+            ->delete()
+            ->where('post_id=:post_id')
+            ->execute([
+                '#connection' => $this->params['TABLE_CONNECTION'],
+                ':post_id' => $postId,
+            ]);
+    }
 
-        /*
-        SELECT * FROM posts
-            LEFT JOIN users_posts ON posts.id=users_posts.post_id
-                WHERE posts.id=1 AND users_posts.user_id=1;
-        */
-        $result = $DB->execute(
-            'SELECT ' .
-            $this->params['TABLE'] . '.image ' .
-            'FROM ' . $this->params['TABLE'] . ' ' .
-            'LEFT JOIN ' . $this->params['TABLE_CONNECTION'] . ' ' .
-            'ON ' . $this->params['TABLE'] . '.id=' . $this->params['TABLE_CONNECTION'] . '.post_id ' . ' ' .
-            'WHERE ' . $this->params['TABLE'] . '.id=' . $postId . ' AND ' . $this->params['TABLE_CONNECTION'] . '.user_id=' . $userId
+    /**
+     * Метод валидации при удалении (является ли юзер автором поста)
+     * @param string $postId
+     * @param string $userId
+     * @return bool|mixed
+     */
+    private function validateDeletion(string $postId, string $userId)
+    {
+        $result = (new ORM('#posts'))
+            ->select([
+                '#posts.image'
+            ])
+            ->left('#connection', '#posts.id=#connection.post_id')
+            ->where('#posts.id=:post_id')
+            ->and('#connection.user_id=:user_id')
+            ->execute([
+                '#posts' => $this->params['TABLE'],
+                '#connection' => $this->params['TABLE_CONNECTION'],
+                ':post_id' => $postId,
+                ':user_id' => $userId,
+            ]);
+
+        return (
+            !empty($result) ? $result['image'] : false
         );
-
-        if (!empty($result)) {
-            return ($result['image']);
-        } else {
-            return (false);
-        }
     }
 }

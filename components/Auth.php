@@ -3,6 +3,7 @@
 namespace Framework\Components;
 
 use Framework\Helpers\Registration as RegistrationHelper;
+use Framework\Modules\ORM;
 
 /**
  * Class Auth
@@ -17,18 +18,20 @@ class Auth extends Component
 {
     protected function Process()
     {
+        global $REQUEST;
         global $USER;
         global $APP;
 
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            if (isset($_GET['logout'])) {
+        $requestMethod = $REQUEST->getMethod();
+        if ($requestMethod == 'GET') {
+            if (isset($REQUEST->arGet['logout'])) {
                 $USER->endSession();
                 $APP->Redirect('/site/');
             }
         } else if ($USER->isAuthorized()) {
             $APP->Redirect('/site/');
-        } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $this->Authorize($_POST['username'], $_POST['password']);
+        } else if ($requestMethod == 'POST') {
+            $this->Authorize($REQUEST->arPost['username'], $REQUEST->arPost['password']);
             $APP->Redirect('/site/');
         }
     }
@@ -41,22 +44,38 @@ class Auth extends Component
     private function Authorize(string $username, string $password)
     {
         global $USER;
-        global $DB;
 
-        $result = $DB->execute(
-            'SELECT id, username, password FROM ' . $this->params['TABLE'] .
-            ' WHERE username=:username AND password=:password',
-            [
-                'username' => $username,
-                'password' => RegistrationHelper::encryptPassword($password),
-            ]
-        );
-
-        if (!empty($result)) {
-            $USER->authorize($result['id'], $result['username']);
-        } else {
-            echo '';
+        $user = $this->validate($username, $password);
+        if (!empty($user)) {
+            $USER->authorize($user['id'], $user['username']);
         }
+    }
+
+    /**
+     * Функция валидации (существование и соответствие паролей)
+     * @param string $username
+     * @param string $password
+     * @return array|mixed|string
+     */
+    private function validate(string $username, string $password)
+    {
+        $user = (new ORM('#users'))
+            ->select(
+                [
+                    'id',
+                    'username',
+                ]
+            )->where('username=:username')
+            ->and('password=:password')
+            ->execute(
+                [
+                    '#users' => $this->params['TABLE'],
+                    ':username' => $username,
+                    ':password' => RegistrationHelper::encryptPassword($password),
+                ]
+            );
+
+        return ($user);
     }
 
 }
