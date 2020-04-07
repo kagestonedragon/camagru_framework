@@ -4,6 +4,11 @@ namespace Framework\Modules;
 
 use Framework\Helpers\Application as AppHelper;
 
+/**
+ * Class Application
+ * @package Framework\Modules
+ * 1. Вынести редирект в отдельный модуль ($request)
+ */
 class Application
 {
     /**

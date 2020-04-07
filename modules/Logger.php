@@ -2,6 +2,10 @@
 
 namespace Framework\Modules;
 
+/**
+ * Class Logger
+ * @package Framework\Modules
+ */
 class Logger
 {
     /**

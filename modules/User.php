@@ -5,8 +5,7 @@ namespace Framework\Modules;
 /**
  * Class User
  * @package Framework\Modules
- *
- * TODO
+ * Основной модуль для работы с данными пользователя
  */
 class User
 {
@@ -16,7 +15,7 @@ class User
      */
     public function isAuthorized()
     {
-        if (!empty($_SESSION['LOGGUED_ON_USER'])) {
+        if (!empty($_SESSION['AUTHORIZED_USER'])) {
             return (true);
         } else {
             return (false);
@@ -32,10 +31,10 @@ class User
     public function authorize(string $id, string $username)
     {
         if (!$this->isAuthorized()) {
-            $_SESSION['LOGGUED_ON_USER'] = [
-                'id' => $id,
-                'username' => $username,
-                'log_in_time' => date('d-m-Y h:i'),
+            $_SESSION['AUTHORIZED_USER'] = [
+                'ID' => $id,
+                'USERNAME' => $username,
+                'AUTH_TIME' => date('d-m-Y h:i'),
             ];
 
             return (true);
@@ -50,23 +49,31 @@ class User
     public function endSession()
     {
         if ($this->isAuthorized()) {
-            $_SESSION['LOGGUED_ON_USER'] = null;
+            $_SESSION['AUTHORIZED_USER'] = null;
 
             session_destroy();
         }
     }
 
+    /**
+     * метод получения имени пользователя
+     * @return mixed
+     */
     public function getUsername()
     {
         if ($this->isAuthorized()) {
-            return ($_SESSION['LOGGUED_ON_USER']['username']);
+            return ($_SESSION['AUTHORIZED_USER']['USERNAME']);
         }
     }
 
+    /**
+     * Метод получения id пользователя
+     * @return mixed
+     */
     public function getId()
     {
         if ($this->isAuthorized()) {
-            return ($_SESSION['LOGGUED_ON_USER']['id']);
+            return ($_SESSION['AUTHORIZED_USER']['ID']);
         }
     }
 }
