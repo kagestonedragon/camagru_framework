@@ -10,6 +10,11 @@ use Framework\Modules\Localization as Loc;
 
 Loc::init(__FILE__);
 
+/**
+ * Class Database
+ * @package Framework\Modules
+ * Класс для работы в базой данных
+ */
 class Database
 {
     const LOG_FILE = 'database.log';
