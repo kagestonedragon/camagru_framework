@@ -17,7 +17,7 @@ class Posts extends Controller
     ];
     const FORM_ITEM = [
         'MODEL' => 'Posts::AddItem',
-        'VIEW' => 'Posts.new'
+        'VIEW' => 'Posts.photo'
     ];
 
     protected function Process()

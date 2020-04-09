@@ -8,22 +8,21 @@ session_start();
 /**
  * Константы
  */
-require_once('constants/framework.php');
+require_once('include/constants/framework.php');
 
 /**
  * Конфигурации
  */
-require_once('config/database.php');
-require_once('config/tables.php');
-require_once('config/router.php');
+require_once('include/config/database.php');
+require_once('include/config/tables.php');
+require_once('include/config/router.php');
 
 /**
  * Автолоадер
  */
-require_once('initialization/autoloader.php');
+require_once('include/autoloader.php');
 
 /**
  * Создание объектов модулей
  */
-require_once('initialization/objects.php');
-//\Framework\Modules\Debugger::show($_SERVER['REQUEST_URI']);
+require_once('include/global_object.php');
