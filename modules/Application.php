@@ -18,12 +18,12 @@ class Application
      * @param string $template
      * @param array $params
      */
-    public function useComponent(string $component, string $template = 'default', array $params = array())
+    public function useComponent(string $component, string $template = 'default', array $params = [])
     {
         $componentNamespace = AppHelper::getComponentNamespace($component);
         $objectComponent = new $componentNamespace($params);
 
-        $this->useTemplate($component, $template, $objectComponent->getResult());
+        $this->useTemplate(explode(':', $component)[0], $template, $objectComponent->getResult());
     }
 
     /**
@@ -38,6 +38,12 @@ class Application
         require_once(
             AppHelper::getTemplatePath($component, $template)
         );
+    }
+
+    public function enableController(string $controller, array $params = [])
+    {
+        $controllerNamespace = AppHelper::getControllerNamespace($controller);
+        $objectController = new $controllerNamespace($params);
     }
 
     public function Redirect(string $url)

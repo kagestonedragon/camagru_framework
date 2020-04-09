@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Components;
+namespace Framework\Components\Basic;
 
 class Component
 {

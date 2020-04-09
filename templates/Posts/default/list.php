@@ -10,7 +10,7 @@
             <p>image: <img height='100' src="<?=$itemValue['image']?>"</p>
             <p>description: <?=$itemValue['description']?></p>
             <p>date: <?=$itemValue['date']?></p>
-            <a href="/site/?post=<?=$itemValue['id']?>&delete">Удалить</a>
+            <a href="/site/items/delete/<?=$itemValue['id']?>">Удалить</a>
         </div>
     <?endforeach;?>
 <?endif;?>

@@ -11,8 +11,20 @@ class Application
      */
     public static function getComponentNamespace(string $component)
     {
+        $component = str_replace(':', '\\', $component);
         return ('Framework\Components\\' . $component);
     }
+
+    /**
+     * Получение полного неймспейса компоненты
+     * @param string $controller
+     * @return string
+     */
+    public static function getControllerNamespace(string $controller)
+    {
+        return ('Framework\Controllers\\' . $controller);
+    }
+
 
     /**
      * Получение полного пути до шаблона
