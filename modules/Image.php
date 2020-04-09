@@ -21,7 +21,7 @@ class Image
             0, 0,
             $maskData[0], $maskData[1]
         );
-        imagejpeg($img, FW_UPLOAD . '/' . $USER->getId() . '/' . $output);
+        imagejpeg($img, FW_UPLOAD_PATH . '/' . $USER->getId() . '/' . $output);
     }
 
     private static function crop($image)

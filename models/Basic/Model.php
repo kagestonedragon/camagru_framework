@@ -1,8 +1,8 @@
 <?php
 
-namespace Framework\Components\Basic;
+namespace Framework\Models\Basic;
 
-class Component
+class Model
 {
     protected array $result = [];
     protected array $params = [];
@@ -19,7 +19,7 @@ class Component
         // your logic
     }
 
-    protected function Process()
+    protected function process()
     {
         // your logic
     }

@@ -5,8 +5,8 @@ function autoloader($class)
     $class = explode('\\', $class);
 
     switch ($class[1]) {
-        case 'Components':
-            loadComponents($class);
+        case 'Models':
+            loadModels($class);
             break;
         case 'Modules':
             loadModules($class);
@@ -21,11 +21,11 @@ function autoloader($class)
 }
 
 /**
- * Подгрузка компонент
+ * Подгрузка моделей
  * @@noinspection PhpIncludeInspection
  * @param $class
  */
-function loadComponents($class)
+function loadModels($class)
 {
     require_once(
         implode(

@@ -1,8 +1,8 @@
 <?php
 
-namespace Framework\Components\Posts;
+namespace Framework\Models\Posts;
 
-use Framework\Components\Basic\Component;
+use Framework\Models\Basic\Model;
 use Framework\Modules\ORM;
 use Framework\Modules\File;
 
@@ -14,7 +14,7 @@ use Framework\Modules\File;
  * 1. Написать кеширование запросов
  * 4. Добавить возможности редактировать пост и удалить
  */
-class DeleteItem extends Component
+class DeleteItem extends Model
 {
     protected function Process()
     {

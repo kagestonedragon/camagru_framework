@@ -1,14 +1,15 @@
 <?php
 $routerConfig = [
+    // POSTS
     [
-        'PATTERN' => '/^(\/site\/items\/)$/',
+        'PATTERN' => '/^(\/items\/)$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
             'ACTION' => 'SHOW_LIST',
         ],
     ],
     [
-        'PATTERN' => '/^(\/site\/items\/)([0-9]+)\/$/',
+        'PATTERN' => '/^(\/items\/)([0-9]+)\/$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
             'ID' => 2,
@@ -16,7 +17,7 @@ $routerConfig = [
         ],
     ],
     [
-        'PATTERN' => '/^(\/site\/items\/add\/)$/',
+        'PATTERN' => '/^(\/items\/add\/)$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
             'ID' => 2,
@@ -24,11 +25,27 @@ $routerConfig = [
         ],
     ],
     [
-        'PATTERN' => '/^(\/site\/items\/delete\/)([0-9]+)\/$/',
+        // DELETE POST RULE
+        'PATTERN' => '/^(\/items\/delete\/)([0-9]+)\/$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
             'ID' => 2,
             'ACTION' => 'DELETE',
         ],
     ],
+    // AUTH
+    [
+        'PATTERN' => '/^(\/auth\/)$/',
+        'LOCATION' => '/site/auth/index.php',
+        'PARAMS' => [
+            'ACTION' => 'FORM',
+        ],
+    ],
+    [
+        'PATTERN' => '/^(\/logout\/)$/',
+        'LOCATION' => '/site/auth/index.php',
+        'PARAMS' => [
+            'ACTION' => 'LOGOUT',
+        ],
+    ]
 ];

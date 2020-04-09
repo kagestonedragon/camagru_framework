@@ -2,20 +2,25 @@
 
 namespace Framework\Helpers;
 
+use Framework\Modules\Debugger;
+
 class Application
 {
     /**
+     * @example Framework\Models\Posts\GetList
      * Получение полного неймспейса компоненты
-     * @param string $component
+     * @param string $model
      * @return string
      */
-    public static function getComponentNamespace(string $component)
+    public static function getModelNamespace(string $model)
     {
-        $component = str_replace(':', '\\', $component);
-        return ('Framework\Components\\' . $component);
+        $model = str_replace('::', '\\', $model);
+
+        return ('Framework\Models\\' . $model);
     }
 
     /**
+     * @example Framework\Controllers\Posts
      * Получение полного неймспейса компоненты
      * @param string $controller
      * @return string
@@ -27,23 +32,25 @@ class Application
 
 
     /**
+     * @example /.../framework/view/Posts/list/view.php
      * Получение полного пути до шаблона
-     * @param string $component
-     * @param string $template
+     * @param string $view
      * @return string
      */
-    public static function getTemplatePath(string $component, string $template)
+    public static function getViewPath(string $view)
     {
+        $view = explode('.', $view);
+
         return (
             implode(
                 '/',
                 [
                     $_SERVER['DOCUMENT_ROOT'],
                     FW_NAME,
-                    'templates',
-                    $component,
-                    $template,
-                    'template.php',
+                    'view',
+                    $view[0],
+                    $view[1],
+                    'view.php',
                 ]
             )
         );

@@ -14,36 +14,34 @@ class Application
     /**
      * Подключение компонента на странице
      * @noinspection PhpUndefinedMethodInspection
-     * @param string $component
-     * @param string $template
+     * @param string $model
      * @param array $params
+     * @return array
      */
-    public function useComponent(string $component, string $template = 'default', array $params = [])
+    public function loadModel(string $model, array $params = [])
     {
-        $componentNamespace = AppHelper::getComponentNamespace($component);
-        $objectComponent = new $componentNamespace($params);
+        $modelNamespace = AppHelper::getModelNamespace($model);
 
-        $this->useTemplate(explode(':', $component)[0], $template, $objectComponent->getResult());
-    }
-
-    /**
-     * Подключение шаблона (часть подключения компонента)
-     * @noinspection PhpIncludeInspection
-     * @param string $component
-     * @param string $template
-     * @param array $result
-     */
-    private function useTemplate(string $component, string $template, array $result)
-    {
-        require_once(
-            AppHelper::getTemplatePath($component, $template)
+        return (
+            (new $modelNamespace($params))->getResult()
         );
     }
 
-    public function enableController(string $controller, array $params = [])
+    /**
+     * Подключение view (шаблона)
+     * @noinspection PhpIncludeInspection
+     * @param string $view
+     * @param array $result
+     */
+    public function loadView(string $view, array $result)
+    {
+        require_once(AppHelper::getViewPath($view));
+    }
+
+    public function loadController(string $controller, array $params = [])
     {
         $controllerNamespace = AppHelper::getControllerNamespace($controller);
-        $objectController = new $controllerNamespace($params);
+        new $controllerNamespace($params);
     }
 
     public function Redirect(string $url)

@@ -26,7 +26,7 @@ class File
         if (File::validateType($type)) {
             $newName = hash('md5', $name . rand());
             $newName .= '.' . File::getExt($type);
-            $dest = FW_UPLOAD . '/' . $dir;
+            $dest = FW_UPLOAD_PATH . '/' . $dir;
             File::validateDir($dest);
             $path = $dest . '/' . $newName;
             copy($tmp, $path);
@@ -42,7 +42,7 @@ class File
      */
     public static function delete(string $dir, string $file)
     {
-        unlink(FW_UPLOAD . '/' . $dir . '/' . $file);
+        unlink(FW_UPLOAD_PATH . '/' . $dir . '/' . $file);
     }
 
     /**

@@ -1,23 +1,18 @@
 <?php
 
-namespace Framework\Components\Posts;
+namespace Framework\Models\Posts;
 
-use Framework\Components\Basic\Component;
+use Framework\Models\Basic\Model;
 use Framework\Helpers\Posts as PostsHelper;
-use Framework\Modules\Debugger;
 use Framework\Modules\ORM;
 
 /**
- * Class Posts
- * @package Framework\Components
- *
- * TODO
- * 1. Написать кеширование запросов
- * 4. Добавить возможности редактировать пост и удалить
+ * Class GetList
+ * @package Framework\Models\Posts
  */
-class ItemsList extends Component
+class GetList extends Model
 {
-    const IMAGES_DIR = '/framework/upload/';
+    const IMAGE_DIRECTORY = '/' . FW_NAME . '/' . FW_UPLOAD . '/';
 
     protected function Process()
     {
@@ -52,7 +47,7 @@ class ItemsList extends Component
             );
 
 
-        PostsHelper::generatePathToImages($items, ItemsList::IMAGES_DIR);
+        PostsHelper::generatePathToImages($items, GetList::IMAGE_DIRECTORY);
         return ($items);
     }
 

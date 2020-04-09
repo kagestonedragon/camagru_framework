@@ -13,9 +13,9 @@ require_once('constants/framework.php');
 /**
  * Конфигурации
  */
-require_once('configuration/database.php');
-require_once('configuration/tables.php');
-require_once('configuration/router.php');
+require_once('config/database.php');
+require_once('config/tables.php');
+require_once('config/router.php');
 
 /**
  * Автолоадер

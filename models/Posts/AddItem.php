@@ -1,9 +1,8 @@
 <?php
 
-namespace Framework\Components\Posts;
+namespace Framework\Models\Posts;
 
-use Framework\Components\Basic\Component;
-use Framework\Modules\Debugger;
+use Framework\Models\Basic\Model;
 use Framework\Modules\ORM;
 use Framework\Modules\File;
 
@@ -15,9 +14,9 @@ use Framework\Modules\File;
  * 1. Написать кеширование запросов
  * 4. Добавить возможности редактировать пост и удалить
  */
-class AddItem extends Component
+class AddItem extends Model
 {
-    protected function Process()
+    protected function process()
     {
         global $REQUEST;
         global $USER;
@@ -31,7 +30,7 @@ class AddItem extends Component
                 $REQUEST->arFiles['image_file']['tmp_name']
             );
             if ($filename !== false) {
-                $itemId = $this->addItem($filename, $_POST['description'], $userId);
+                $itemId = $this->addItem($filename, $_POST['description']);
                 $this->addConnection($itemId, $userId);
             }
         }
@@ -44,7 +43,7 @@ class AddItem extends Component
      * @param string $userId
      * @return array|mixed|string
      */
-    private function addItem(string $image, string $description, string $userId)
+    private function addItem(string $image, string $description)
     {
         $id = (new ORM('#posts'))
             ->insert([
