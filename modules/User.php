@@ -46,7 +46,7 @@ class User
     /**
      * Метод завершения сессии
      */
-    public function endSession()
+    public function logout()
     {
         if ($this->isAuthorized()) {
             $_SESSION['AUTHORIZED_USER'] = null;

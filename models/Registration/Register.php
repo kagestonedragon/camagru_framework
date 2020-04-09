@@ -1,38 +1,26 @@
 <?php
 
-namespace Framework\Components;
+namespace Framework\Models\Registration;
 
 use Framework\Helpers\Registration as RegistrationHelper;
+use Framework\Models\Basic\Model;
 use Framework\Modules\ORM;
 
-/**
- * Class Registration
- * @package Framework\Components
- *
- * TODO
- * 1. Дописать метод отправки письма с подтверждением на почту
- * 2. Метод для ajax обработки
- * 3. Метод подтверждения регистрации
- */
-class Registration extends Component
+class Register extends Model
 {
     protected function Process()
     {
         global $REQUEST;
-        global $USER;
-        global $APP;
 
-        $requestMethod = $REQUEST->getMethod();
-        if ($USER->isAuthorized()) {
-            $APP->Redirect('/site/');
-        } else if ($requestMethod == 'POST') {
-            if ($this->isUserNotExists($REQUEST->arPost['username'], $REQUEST->arPost['email'])) {
-                $this->addUser(
-                    $REQUEST->arPost['username'],
-                    $REQUEST->arPost['email'],
-                    $REQUEST->arPost['password']
-                );
-            }
+        if ($this->isUserNotExists($REQUEST->arPost['username'], $REQUEST->arPost['email'])) {
+            $this->addUser(
+                $REQUEST->arPost['username'],
+                $REQUEST->arPost['email'],
+                $REQUEST->arPost['password']
+            );
+
+            $this->result['email'] = $REQUEST->arPost['email'];
+            $this->setStatus('verification');
         }
     }
 
@@ -46,7 +34,7 @@ class Registration extends Component
     {
         $user = (new ORM('#users'))
             ->select([
-                    'id'
+                'id'
             ])
             ->where('username=:username')
             ->or('email=:email')
@@ -56,9 +44,7 @@ class Registration extends Component
                 ':email' => $email,
             ]);
 
-        return (
-            empty($user) ? true : false
-        );
+        return (empty($user) ? true : false);
     }
 
     /**
@@ -77,6 +63,7 @@ class Registration extends Component
                 'token' => ':token',
             ])
             ->execute([
+                '#users' => $this->params['TABLE'],
                 ':username' => $username,
                 ':email' => $email,
                 ':password' => RegistrationHelper::encryptPassword($password),

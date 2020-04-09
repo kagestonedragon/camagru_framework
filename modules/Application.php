@@ -33,7 +33,7 @@ class Application
      * @param string $view
      * @param array $result
      */
-    public function loadView(string $view, array $result)
+    public function loadView(string $view, array $result = [])
     {
         require_once(AppHelper::getViewPath($view));
     }

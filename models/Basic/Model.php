@@ -28,4 +28,9 @@ class Model
     {
         return ($this->result);
     }
+
+    protected function setStatus(string $status)
+    {
+        $this->result['status'] = $status;
+    }
 }

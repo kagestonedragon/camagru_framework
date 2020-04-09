@@ -25,7 +25,6 @@ $routerConfig = [
         ],
     ],
     [
-        // DELETE POST RULE
         'PATTERN' => '/^(\/items\/delete\/)([0-9]+)\/$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
@@ -47,5 +46,13 @@ $routerConfig = [
         'PARAMS' => [
             'ACTION' => 'LOGOUT',
         ],
-    ]
+    ],
+    // REGISTRATION
+    [
+        'PATTERN' => '/^(\/registration\/)$/',
+        'LOCATION' => '/site/registration/index.php',
+        'PARAMS' => [
+            'ACTION' => 'FORM',
+        ],
+    ],
 ];

@@ -20,36 +20,24 @@ class Authorize extends Model
     protected function Process()
     {
         global $REQUEST;
-        global $USER;
-        global $APPLICATION;
 
-        $requestMethod = $REQUEST->getMethod();
-        if ($requestMethod == 'GET') {
-            if (isset($REQUEST->arGet['logout'])) {
-                $USER->endSession();
-                $APPLICATION->Redirect('/site/');
-            }
-        } else if ($USER->isAuthorized()) {
-            $APPLICATION->Redirect('/site/');
-        } else if ($requestMethod == 'POST') {
-            $this->Authorize($REQUEST->arPost['username'], $REQUEST->arPost['password']);
-            $APPLICATION->Redirect('/site/');
+        $user = $this->validate($REQUEST->arPost['username'], $REQUEST->arPost['password']);
+        if ($user !== false) {
+            $this->authorize($user['id'], $user['username']);
+            $this->setStatus('success');
         }
     }
 
     /**
      * Метод авторизации пользователя
+     * @param string $userId
      * @param string $username
-     * @param string $password
      */
-    private function Authorize(string $username, string $password)
+    private function authorize(string $userId, string $username)
     {
         global $USER;
 
-        $user = $this->validate($username, $password);
-        if (!empty($user)) {
-            $USER->authorize($user['id'], $user['username']);
-        }
+        $USER->authorize($userId, $username);
     }
 
     /**
@@ -76,7 +64,7 @@ class Authorize extends Model
                 ]
             );
 
-        return ($user);
+        return (!empty($user) ? $user : false);
     }
 
 }
