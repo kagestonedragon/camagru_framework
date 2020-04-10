@@ -32,6 +32,7 @@ class AddItem extends Model
             if ($filename !== false) {
                 $itemId = $this->addItem($filename, $_POST['description']);
                 $this->addConnection($itemId, $userId);
+                $this->setStatus('success');
             }
         }
     }

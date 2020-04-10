@@ -16,8 +16,13 @@ use Framework\Modules\File;
  */
 class DeleteItem extends Model
 {
+    const COMMENTARIES_DELETE = [
+        'MODEL' => 'Posts::DeleteCommentaries',
+    ];
+
     protected function Process()
     {
+        global $APPLICATION;
         global $REQUEST;
         global $USER;
 
@@ -30,6 +35,14 @@ class DeleteItem extends Model
                 $this->deleteItem($itemId, $userId);
                 $this->deleteConnection($itemId);
                 File::delete($userId, $filename);
+                $APPLICATION->loadModel(
+                    DeleteItem::COMMENTARIES_DELETE['MODEL'],
+                    [
+                        'TABLE' => $this->params['TABLE_COMMENTARIES'],
+                        'TABLE_CONNECTION' => $this->params['TABLE_COMMENTARIES_CONNECTION'],
+                        'ITEM_ID' => $itemId,
+                    ]
+                );
             }
 
         }

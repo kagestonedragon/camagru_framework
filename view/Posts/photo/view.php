@@ -1,3 +1,4 @@
+<a href="/items/">Вернуться назад</a><br>
 <canvas id="canvas" style="border: 1px solid red;"></canvas>
 <form method="post">
     <input type="file" id="loadImage" name="file">

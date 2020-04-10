@@ -63,6 +63,15 @@ class ORM
         return ($this);
     }
 
+    public function in(array $fields)
+    {
+        $this->query .= ' IN ';
+        $this->query .= '(' . implode(',', $fields) . ')';
+        $this->query .= ' ';
+
+        return ($this);
+    }
+
     public function and(string $condition)
     {
         $this->query .= 'AND ' . $condition;

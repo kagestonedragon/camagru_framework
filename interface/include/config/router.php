@@ -32,6 +32,22 @@ $routerConfig = [
             'ACTION' => 'DELETE',
         ],
     ],
+    [
+        'PATTERN' => '/^(\/items\/)([0-9]+)(\/commentaries\/add\/)$/',
+        'LOCATION' => '/site/items/index.php',
+        'PARAMS' => [
+            'ID' => 2,
+            'ACTION' => 'COMMENTARY_ADD',
+        ],
+    ],
+    [
+        'PATTERN' => '/^(\/items\/)([0-9]+)(\/commentary\/)([0-9]+)(\/delete\/)$/',
+        'LOCATION' => '/site/items/index.php',
+        'PARAMS' => [
+            'ID' => 4,
+            'ACTION' => 'COMMENTARY_DELETE',
+        ],
+    ],
     // AUTH
     [
         'PATTERN' => '/^(\/auth\/)$/',

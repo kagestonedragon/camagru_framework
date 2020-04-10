@@ -19,27 +19,65 @@ class Posts extends Controller
         'MODEL' => 'Posts::AddItem',
         'VIEW' => 'Posts.photo'
     ];
+    const COMMENTARY_ADD = [
+        'MODEL' => 'Posts::AddCommentary',
+    ];
+    const COMMENTARY_DELETE = [
+        'MODEL' => 'Posts::DeleteCommentary',
+    ];
 
     protected function Process()
     {
+        global $USER;
         global $REQUEST;
         global $dbTables;
+        global $APPLICATION;
 
-        $params = [
+        if (!$USER->isAuthorized()) {
+            $APPLICATION->Redirect('/auth/');
+        }
+
+        $itemParams = [
             'TABLE' => $dbTables['POSTS'],
             'TABLE_CONNECTION' => $dbTables['USERS_POSTS'],
             'TABLE_USERS' => $dbTables['USERS'],
+            'TABLE_COMMENTARIES' => $dbTables['COMMENTARIES'],
+            'TABLE_COMMENTARIES_CONNECTION' => $dbTables['USERS_POSTS_COMMENTARIES'],
+        ];
+        $commentaryParam = [
+            'TABLE' => $dbTables['COMMENTARIES'],
+            'TABLE_CONNECTION' => $dbTables['USERS_POSTS_COMMENTARIES'],
         ];
         $action = $REQUEST->arGet['ACTION'];
         if ($action == 'SHOW_LIST') {
-            $this->showList(Posts::SHOW_LIST['MODEL'], Posts::SHOW_LIST['VIEW'], $params);
+            $this->showList(Posts::SHOW_LIST['MODEL'], Posts::SHOW_LIST['VIEW'], $itemParams);
         } else if ($action == 'SHOW_ITEM') {
-            $this->showItem(Posts::SHOW_ITEM['MODEL'], Posts::SHOW_ITEM['VIEW'], $params);
+            $this->showItem(Posts::SHOW_ITEM['MODEL'], Posts::SHOW_ITEM['VIEW'], $itemParams);
         } else if ($action == "DELETE") {
-            $this->deleteItem(Posts::DELETE_ITEM['MODEL'], $params);
+            $this->deleteItem(Posts::DELETE_ITEM['MODEL'], $itemParams);
         } else if ($action == "FORM") {
-            $this->formItem(Posts::FORM_ITEM['MODEL'], Posts::FORM_ITEM['VIEW'], $params);
+            $this->formItem(Posts::FORM_ITEM['MODEL'], Posts::FORM_ITEM['VIEW'], $itemParams);
+        } else if ($action == 'COMMENTARY_ADD') {
+            $this->addCommentary(Posts::COMMENTARY_ADD['MODEL'], $commentaryParam);
+        } else if ($action == 'COMMENTARY_DELETE') {
+            $this->deleteCommentary(Posts::COMMENTARY_DELETE['MODEL'], $commentaryParam);
         }
+    }
+
+    private function addCommentary(string $model, array $params = [])
+    {
+        global $APPLICATION;
+
+        $APPLICATION->loadModel($model, $params);
+        $APPLICATION->Redirect('/items/');
+    }
+
+    private function deleteCommentary(string $model, array $params = [])
+    {
+        global $APPLICATION;
+
+        $APPLICATION->loadModel($model, $params);
+        $APPLICATION->Redirect('/items/');
     }
 
     private function showList(string $model, string $view, array $params = [])
@@ -80,7 +118,7 @@ class Posts extends Controller
             $result = $APPLICATION->loadModel($model, $params);
         }
 
-        if (isset($result['STATUS']) && $result['STATUS'] == 'success') {
+        if (isset($result['status']) && $result['status'] == 'success') {
             $APPLICATION->Redirect("/items/");
         }
 

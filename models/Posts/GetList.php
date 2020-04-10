@@ -4,6 +4,7 @@ namespace Framework\Models\Posts;
 
 use Framework\Models\Basic\Model;
 use Framework\Helpers\Posts as PostsHelper;
+use Framework\Modules\Debugger;
 use Framework\Modules\ORM;
 
 /**
@@ -13,10 +14,26 @@ use Framework\Modules\ORM;
 class GetList extends Model
 {
     const IMAGE_DIRECTORY = '/' . FW_NAME . '/' . FW_UPLOAD . '/';
+    const GET_COMMENTARIES = [
+        'MODEL' => 'Posts::GetCommentaries',
+    ];
 
     protected function Process()
     {
+        global $APPLICATION;
+
         $this->result['ITEMS'] = $this->getItemsList();
+        $this->result['COMMENTARIES'] = $APPLICATION->loadModel(
+            GetList::GET_COMMENTARIES['MODEL'],
+            [
+                'TABLE' => $this->params['TABLE_COMMENTARIES'],
+                'TABLE_CONNECTION' => $this->params['TABLE_COMMENTARIES_CONNECTION'],
+                'TABLE_USERS' => $this->params['TABLE_USERS'],
+                'ITEMS_IDS' => array_column($this->result['ITEMS'], 'id')
+            ]
+        );
+        //
+        //Debugger::show($this->result['ITEMS']);
     }
 
     /**
@@ -45,7 +62,6 @@ class GetList extends Model
             ],
                 false
             );
-
 
         PostsHelper::generatePathToImages($items, GetList::IMAGE_DIRECTORY);
         return ($items);
