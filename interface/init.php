@@ -9,6 +9,7 @@ session_start();
  * Константы
  */
 require_once('include/constants/framework.php');
+require_once('include/constants/site.php');
 
 /**
  * Конфигурации

@@ -17,14 +17,22 @@ use Framework\Modules\ORM;
  */
 class Authorize extends Model
 {
+    const STATUS = [
+        'NOT_VALID_DATA' => 5200,
+        'NOT_VERIFIED' => 5201,
+        'SUCCESS' => 5202,
+    ];
+
     protected function Process()
     {
         global $REQUEST;
 
         $user = $this->validate($REQUEST->arPost['username'], $REQUEST->arPost['password']);
-        if ($user !== false) {
+        if (is_array($user)) {
             $this->authorize($user['id'], $user['username']);
-            $this->setStatus('success');
+            $this->setStatus(Authorize::STATUS['SUCCESS']);
+        } else {
+            $this->setStatus($user);
         }
     }
 
@@ -49,12 +57,12 @@ class Authorize extends Model
     private function validate(string $username, string $password)
     {
         $user = (new ORM('#users'))
-            ->select(
-                [
+            ->select([
                     'id',
                     'username',
-                ]
-            )->where('username=:username')
+                    'verified',
+            ])
+            ->where('username=:username')
             ->and('password=:password')
             ->execute(
                 [
@@ -64,7 +72,13 @@ class Authorize extends Model
                 ]
             );
 
-        return (!empty($user) ? $user : false);
+        if (empty($user)) {
+            return (Authorize::STATUS['NOT_VALID_DATA']);
+        } else if ($user['verified'] == '0') {
+            return (Authorize::STATUS['NOT_VERIFIED']);
+        } else {
+            return ($user);
+        }
     }
 
 }

@@ -5,9 +5,19 @@ namespace Framework\Models\Registration;
 use Framework\Helpers\Registration as RegistrationHelper;
 use Framework\Models\Basic\Model;
 use Framework\Modules\ORM;
+use Framework\Modules\Mail;
 
 class Register extends Model
 {
+    const VERIFICATION_LINK = SITE_DOMAIN . '/registration/#TOKEN#/';
+    const STATUS = [
+        'NOT_VALID_DATA' => 4200,
+        'ALREADY_EXISTS' => 4201,
+        'SUCCESS' => 4202,
+    ];
+
+    private string $token = '';
+
     protected function Process()
     {
         global $REQUEST;
@@ -20,7 +30,10 @@ class Register extends Model
             );
 
             $this->result['email'] = $REQUEST->arPost['email'];
-            $this->setStatus('verification');
+            $this->sendVerificationLink($this->result['email'], $this->token);
+            $this->setStatus(Register::STATUS['SUCCESS']);
+        } else {
+            $this->setStatus(Register::STATUS['ALREADY_EXISTS']);
         }
     }
 
@@ -55,6 +68,8 @@ class Register extends Model
      */
     private function addUser(string $username, string $email, string $password)
     {
+        $this->token = RegistrationHelper::generateToken($username);
+
         (new ORM('#users'))
             ->insert([
                 'username' => ':username',
@@ -67,7 +82,18 @@ class Register extends Model
                 ':username' => $username,
                 ':email' => $email,
                 ':password' => RegistrationHelper::encryptPassword($password),
-                ':token' => RegistrationHelper::generateToken($username),
+                ':token' => $this->token,
             ]);
+    }
+
+    private function sendVerificationLink(string $email, string $token)
+    {
+        $verificationLink = 'http://' . str_replace('#TOKEN#', $token, Register::VERIFICATION_LINK);
+
+        Mail::send(
+            $email,
+            'Registration verification | Camagru',
+            '<a href="' . $verificationLink . '">Подтвержить</a>'
+        );
     }
 }

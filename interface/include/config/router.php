@@ -87,4 +87,12 @@ $routerConfig = [
             'ACTION' => 'FORM',
         ],
     ],
+    [
+        'PATTERN' => '/^(\/registration\/)(\S*)\/$/',
+        'LOCATION' => '/site/registration/index.php',
+        'PARAMS' => [
+            'TOKEN' => 2,
+            'ACTION' => 'VERIFICATION',
+        ],
+    ],
 ];

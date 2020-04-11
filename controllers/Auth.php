@@ -2,6 +2,8 @@
 
 namespace Framework\Controllers;
 
+use Framework\Models\Auth\Authorize;
+
 /**
  * Class Auth
  * @package Framework\Controllers
@@ -51,7 +53,7 @@ class Auth extends Controller
             $result = $APPLICATION->loadModel($model, $params);
         }
 
-        if (isset($result['status']) && $result['status'] == 'success') {
+        if (isset($result['status']) && $result['status'] == Authorize::STATUS["SUCCESS"]) {
             $APPLICATION->Redirect('/items/');
         }
 
