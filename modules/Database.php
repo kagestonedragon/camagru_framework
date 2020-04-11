@@ -81,11 +81,13 @@ class Database
      */
     public function execute(string $query, array $params = [], bool $isOne = true)
     {
+        //Debugger::show($query, false);
         $pdoQuery = $this->pdo->prepare($query);
         $pdoQuery->execute($params);
 
         if (strpos($query, 'INSERT INTO') === false &&
-            strpos($query, 'DELETE') === false
+            strpos($query, 'DELETE') === false &&
+            strpos($query, 'UPDATE') === false
         ) {
             $result = $pdoQuery->fetchAll(PDO::FETCH_ASSOC);
 

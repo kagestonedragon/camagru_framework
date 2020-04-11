@@ -11,6 +11,11 @@ $userId = $USER->getId();
         <div id="post_<?=$itemValue['id']?>" style="border: 1px solid red;">
             <p>user: <?=$itemValue['username']?></p>
             <p>image: <img height='100' src="<?=$itemValue['image']?>"</p>
+            <?if ($itemValue['LIKE_ACTION'] == 'add'):?>
+                <p><?=$itemValue['likes']?> лайков <a href="/items/<?=$itemValue['id']?>/likes/add/">Оставить лайк</a></p>
+            <?else:?>
+                <p><?=$itemValue['likes']?> лайков <a href="/items/<?=$itemValue['id']?>/likes/delete/">Забрать лайк</a></p>
+            <?endif;?>
             <p>description: <?=$itemValue['description']?></p>
             <p>date: <?=$itemValue['date']?></p>
             <?foreach ($result['COMMENTARIES'][$itemValue['id']] as $commentary) :?>

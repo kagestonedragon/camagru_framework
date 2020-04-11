@@ -19,6 +19,9 @@ class DeleteItem extends Model
     const COMMENTARIES_DELETE = [
         'MODEL' => 'Posts::DeleteCommentaries',
     ];
+    const LIKES_DELETE = [
+        'MODEL' => 'Posts::DeleteLikes',
+    ];
 
     protected function Process()
     {
@@ -43,8 +46,14 @@ class DeleteItem extends Model
                         'ITEM_ID' => $itemId,
                     ]
                 );
+                $APPLICATION->loadModel(
+                    DeleteItem::LIKES_DELETE['MODEL'],
+                    [
+                        'TABLE' => $this->params['TABLE'],
+                        'ITEM_ID' => $itemId,
+                    ]
+                );
             }
-
         }
     }
 

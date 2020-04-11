@@ -1,6 +1,7 @@
 <?php
 
 namespace Framework\Modules;
+use Framework\Helpers\ORM as ORMHelper;
 use Framework\Modules\Debugger;
 
 /**
@@ -46,6 +47,17 @@ class ORM
         return ($this);
     }
 
+    public function update(array $values)
+    {
+        $this->query .= 'UPDATE ';
+        $this->query .= $this->table;
+        $this->query .= ' SET ';
+        $this->query .= ORMHelper::getUpdateValues($values);
+        $this->query .= ' ';
+
+        return ($this);
+    }
+
     public function delete()
     {
         $this->query .= 'DELETE';
@@ -65,8 +77,12 @@ class ORM
 
     public function in(array $fields)
     {
-        $this->query .= ' IN ';
-        $this->query .= '(' . implode(',', $fields) . ')';
+        $this->query .= 'IN ';
+        if (!empty($fields)) {
+            $this->query .= '(' . implode(',', $fields) . ')';
+        } else {
+            $this->query .= '(0)';
+        }
         $this->query .= ' ';
 
         return ($this);

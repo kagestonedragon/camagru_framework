@@ -41,7 +41,6 @@ class AddItem extends Model
      * Метод добавления нового поста
      * @param string $image
      * @param string $description
-     * @param string $userId
      * @return array|mixed|string
      */
     private function addItem(string $image, string $description)

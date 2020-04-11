@@ -17,23 +17,34 @@ class GetList extends Model
     const GET_COMMENTARIES = [
         'MODEL' => 'Posts::GetCommentaries',
     ];
+    const GET_LIKES = [
+        'MODEL' => 'Posts::GetLikes',
+    ];
 
-    protected function Process()
+    protected function process()
     {
         global $APPLICATION;
+        global $USER;
 
         $this->result['ITEMS'] = $this->getItemsList();
+        $itemIds = array_column($this->result['ITEMS'], 'id');
         $this->result['COMMENTARIES'] = $APPLICATION->loadModel(
             GetList::GET_COMMENTARIES['MODEL'],
             [
                 'TABLE' => $this->params['TABLE_COMMENTARIES'],
                 'TABLE_CONNECTION' => $this->params['TABLE_COMMENTARIES_CONNECTION'],
                 'TABLE_USERS' => $this->params['TABLE_USERS'],
-                'ITEMS_IDS' => array_column($this->result['ITEMS'], 'id')
+                'ITEMS_IDS' => $itemIds,
             ]
         );
-        //
-        //Debugger::show($this->result['ITEMS']);
+        $likes = $APPLICATION->loadModel(
+            GetList::GET_LIKES['MODEL'],
+            [
+                'TABLE_CONNECTION' => $this->params['TABLE_LIKES'],
+                'ITEMS_IDS' => $itemIds,
+            ]
+        );
+        PostsHelper::setLikeActions($this->result['ITEMS'], $likes, $USER->getId());
     }
 
     /**
@@ -48,7 +59,8 @@ class GetList extends Model
                 '#users.id as user_id',
                 '#posts.image',
                 '#posts.description',
-                '#posts.date'
+                '#posts.date',
+                '#posts.likes',
             ])
             ->left('#connection', '#posts.id=#connection.post_id')
             ->left('#users', '#connection.user_id=#users.id')
@@ -56,13 +68,14 @@ class GetList extends Model
                 '#posts.date',
                 'DESC'
             )->execute([
-                '#posts' => $this->params['TABLE'],
-                '#users' => $this->params['TABLE_USERS'],
-                '#connection' => $this->params['TABLE_CONNECTION'],
-            ],
+                    '#posts' => $this->params['TABLE'],
+                    '#users' => $this->params['TABLE_USERS'],
+                    '#connection' => $this->params['TABLE_CONNECTION'],
+                ],
                 false
             );
 
+        //Debugger::show($items);
         PostsHelper::generatePathToImages($items, GetList::IMAGE_DIRECTORY);
         return ($items);
     }

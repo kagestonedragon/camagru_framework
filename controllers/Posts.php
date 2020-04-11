@@ -17,13 +17,19 @@ class Posts extends Controller
     ];
     const FORM_ITEM = [
         'MODEL' => 'Posts::AddItem',
-        'VIEW' => 'Posts.photo'
+        'VIEW' => 'Posts.new'
     ];
     const COMMENTARY_ADD = [
         'MODEL' => 'Posts::AddCommentary',
     ];
     const COMMENTARY_DELETE = [
         'MODEL' => 'Posts::DeleteCommentary',
+    ];
+    const LIKE_ADD = [
+        'MODEL' => 'Posts::AddLike',
+    ];
+    const LIKE_DELETE = [
+        'MODEL' => 'Posts::DeleteLike',
     ];
 
     protected function Process()
@@ -43,10 +49,15 @@ class Posts extends Controller
             'TABLE_USERS' => $dbTables['USERS'],
             'TABLE_COMMENTARIES' => $dbTables['COMMENTARIES'],
             'TABLE_COMMENTARIES_CONNECTION' => $dbTables['USERS_POSTS_COMMENTARIES'],
+            'TABLE_LIKES' => $dbTables['USERS_POSTS_LIKES'],
         ];
         $commentaryParam = [
             'TABLE' => $dbTables['COMMENTARIES'],
             'TABLE_CONNECTION' => $dbTables['USERS_POSTS_COMMENTARIES'],
+        ];
+        $likeParams = [
+            'TABLE' => $dbTables['POSTS'],
+            'TABLE_CONNECTION' => $dbTables['USERS_POSTS_LIKES'],
         ];
         $action = $REQUEST->arGet['ACTION'];
         if ($action == 'SHOW_LIST') {
@@ -61,7 +72,27 @@ class Posts extends Controller
             $this->addCommentary(Posts::COMMENTARY_ADD['MODEL'], $commentaryParam);
         } else if ($action == 'COMMENTARY_DELETE') {
             $this->deleteCommentary(Posts::COMMENTARY_DELETE['MODEL'], $commentaryParam);
+        } else if ($action == 'LIKE_ADD') {
+            $this->addLike(Posts::LIKE_ADD['MODEL'], $likeParams);
+        } else if ($action == 'LIKE_DELETE') {
+            $this->deleteLike(Posts::LIKE_DELETE['MODEL'], $likeParams);
         }
+    }
+
+    private function deleteLike(string $model, array $params = [])
+    {
+        global $APPLICATION;
+
+        $APPLICATION->loadModel($model, $params);
+        $APPLICATION->Redirect('/items/');
+    }
+
+    private function addLike(string $model, array $params = [])
+    {
+        global $APPLICATION;
+
+        $APPLICATION->loadModel($model, $params);
+        $APPLICATION->Redirect('/items/');
     }
 
     private function addCommentary(string $model, array $params = [])
