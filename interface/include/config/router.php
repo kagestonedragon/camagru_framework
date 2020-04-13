@@ -9,6 +9,13 @@ $routerConfig = [
         ],
     ],
     [
+        'PATTERN' => '/^(\/ajax\/items\/)$/',
+        'LOCATION' => '/site/ajax/index.php',
+        'PARAMS' => [
+            'ACTION' => 'GET_ITEMS',
+        ],
+    ],
+    [
         'PATTERN' => '/^(\/items\/)([0-9]+)\/$/',
         'LOCATION' => '/site/items/index.php',
         'PARAMS' => [
@@ -35,6 +42,14 @@ $routerConfig = [
     [
         'PATTERN' => '/^(\/items\/)([0-9]+)(\/commentaries\/add\/)$/',
         'LOCATION' => '/site/items/index.php',
+        'PARAMS' => [
+            'ID' => 2,
+            'ACTION' => 'COMMENTARY_ADD',
+        ],
+    ],
+    [
+        'PATTERN' => '/^(\/ajax\/items\/)([0-9]+)(\/commentaries\/add\/)$/',
+        'LOCATION' => '/site/ajax/index.php',
         'PARAMS' => [
             'ID' => 2,
             'ACTION' => 'COMMENTARY_ADD',

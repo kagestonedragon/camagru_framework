@@ -23,9 +23,14 @@ class Auth extends Controller
 
     protected function process()
     {
+        global $APPLICATION;
         global $REQUEST;
         global $dbTables;
+        global $USER;
 
+        if ($USER->isAuthorized()) {
+            $APPLICATION->Redirect('/items/');
+        }
         $params = [
             'TABLE' => $dbTables['USERS'],
         ];

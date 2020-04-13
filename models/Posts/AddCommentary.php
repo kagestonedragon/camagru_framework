@@ -16,6 +16,8 @@ class AddCommentary extends Model
         $userId = $USER->getId();
         $commentaryId = $this->addCommentary($itemId, $REQUEST->arPost['commentary']);
         $this->addConnection($userId, $itemId, $commentaryId);
+        $this->result['id'] = $commentaryId;
+        $this->result['item_id'] = $itemId;
     }
 
     private function addCommentary(string $itemId, string $text)
